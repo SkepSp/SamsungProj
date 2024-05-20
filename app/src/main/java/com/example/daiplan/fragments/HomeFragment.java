@@ -96,9 +96,9 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (isEditable) {
-                    //Dialog dialog = new Dialog(getContext());
-                    //showDialog(dialog, position, true);
-                    jsonAdapter.activityListSave(activityArrayList);
+                    Dialog dialog = new Dialog(getContext());
+                    showDialog(dialog, position, true);
+                    //jsonAdapter.activityListSave(activityArrayList);
                 }
             }
         });
