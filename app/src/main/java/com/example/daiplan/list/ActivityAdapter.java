@@ -38,4 +38,5 @@ public class ActivityAdapter extends ArrayAdapter <Activity> {
     }
 
     //сортировку сюда
+
 }

@@ -2,6 +2,10 @@ package com.example.daiplan.list;
 
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.ContactsContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,31 +19,36 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class ListJsonAdapter {
 
-    private File file;
-    Context context;
+    private Context context;
+    private String fileName;
     public ListJsonAdapter(Context context) {
         this.context = context;
+        fileName = "DaiPlanData.json";
     }
-    private void activityListSetup(ArrayList<Activity>[] list) {
+    public void activityListSetup(ArrayList<Activity>[] list) {
         try {
-            FileInputStream fileInputStream = context.openFileInput("DaiPlanData.json");
+            String recivingString = "";
 
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+            InputStream inputStream = context.openFileInput(fileName);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String recivingString;
             StringBuilder stringBuilder = new StringBuilder();
             while ((recivingString = bufferedReader.readLine()) != null) {
                 stringBuilder.append(recivingString);
             }
-            fileInputStream.close();
+            inputStream.close();
+            recivingString = stringBuilder.toString();
 
-            JSONObject mainRoot = new JSONObject(recivingString.toString());
-            JSONArray daysArray = mainRoot.getJSONArray("Week");
+            JSONObject mainRoot = new JSONObject(recivingString);
+
+            JSONObject Week = (JSONObject) mainRoot.get("Week");
+            JSONArray daysArray = (JSONArray) Week.getJSONArray("Days");
 
             for (int i = 0; i < daysArray.length(); i++) {
                 JSONArray activityArray = daysArray.getJSONArray(i);
@@ -54,6 +63,8 @@ public class ListJsonAdapter {
                     list[i].add(activity);
                 }
             }
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }catch (FileNotFoundException e) {
@@ -66,8 +77,10 @@ public class ListJsonAdapter {
         try {
         JSONObject mainRoot = new JSONObject();
         JSONArray daysArray = new JSONArray();
+        JSONObject week = new JSONObject();
 
-        mainRoot.put("Days", daysArray);
+        week.put("Days", daysArray);
+        mainRoot.put("Week", week);
 
         for (int i = 0; i < list.length; i++) {
             JSONArray activityArray = new JSONArray();
@@ -83,9 +96,10 @@ public class ListJsonAdapter {
             daysArray.put(activityArray);
         }
 
-        FileOutputStream fileOutputStream = context.openFileOutput("DaiPlanData.json", Context.MODE_PRIVATE);
-        fileOutputStream.write(mainRoot.toString().getBytes());
-        fileOutputStream.close();
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE));
+        String str = mainRoot.toString();
+        outputStreamWriter.write(mainRoot.toString());
+        outputStreamWriter.close();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

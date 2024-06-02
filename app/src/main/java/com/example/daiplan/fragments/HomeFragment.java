@@ -2,12 +2,12 @@ package com.example.daiplan.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
+
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -17,12 +17,15 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.daiplan.R;
 import com.example.daiplan.databinding.FragmentHomeBinding;
 import com.example.daiplan.list.Activity;
 import com.example.daiplan.list.ActivityAdapter;
 import com.example.daiplan.list.ListJsonAdapter;
+import com.example.daiplan.list.myDialog;
+import com.example.daiplan.notification.TimePickerFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
@@ -30,24 +33,32 @@ import com.google.android.material.tabs.TabLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.Objects;
 
 
 public class HomeFragment extends Fragment {
-
-    private ListJsonAdapter jsonAdapter = new ListJsonAdapter(getContext());
+    private ListJsonAdapter jsonAdapter;
     private FragmentHomeBinding binding;
     private boolean isEditable = false;
     private ArrayList<Activity>[] activityArrayList = new ArrayList[7];
     private ActivityAdapter adapter;
+    private Context actContext;
+
+    public HomeFragment(Context context) {
+        super();
+        actContext = context;
+        jsonAdapter = new ListJsonAdapter(context);
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         for (int i =0; i<7; i++) {
             activityArrayList[i] = new ArrayList<>();
         }
+
+        jsonAdapter.activityListSetup(activityArrayList);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("u");
         binding.tabLayout.selectTab(binding.tabLayout.getTabAt(Integer.parseInt(dateFormat.format(new Date())) - 1));
@@ -71,10 +82,10 @@ public class HomeFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        binding.switch1.setOnClickListener(new View.OnClickListener() {
+        binding.switch2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isEditable = binding.switch1.isChecked();
+                isEditable = binding.switch2.isChecked();
 
                 if (isEditable) {
                     binding.floatingActionButton.setVisibility(View.VISIBLE);
@@ -87,8 +98,8 @@ public class HomeFragment extends Fragment {
         binding.floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog dialog = new Dialog(getContext());
-                showDialog(dialog, null, false);
+                myDialog dialog = new myDialog(null, false, binding.tabLayout.getSelectedTabPosition(), adapter, activityArrayList);
+                dialog.show(getActivity().getSupportFragmentManager(), "Tag");
             }
         });
 
@@ -96,9 +107,8 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (isEditable) {
-                    Dialog dialog = new Dialog(getContext());
-                    showDialog(dialog, position, true);
-                    //jsonAdapter.activityListSave(activityArrayList);
+                    myDialog dialog = new myDialog(position, true, binding.tabLayout.getSelectedTabPosition(),adapter, activityArrayList);
+                    dialog.show(getActivity().getSupportFragmentManager(), "Tag");
                 }
             }
         });
@@ -111,67 +121,9 @@ public class HomeFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void showDialog(Dialog dialog, Integer activityPosition, boolean isEdit) {
-        dialog.setCancelable(false);
-
-        dialog.setContentView(R.layout.dialog_layout);
-
-        Button confirmButton = dialog.findViewById(R.id.confirmButton);
-        Button cancelButton = dialog.findViewById(R.id.cancelButton);
-        FloatingActionButton deleteButton = dialog.findViewById(R.id.delButton);
-
-        EditText editName = dialog.findViewById(R.id.editName);
-        EditText editDescription = dialog.findViewById(R.id.editDescription);
-        TextView deleteTitle = dialog.findViewById(R.id.delTitle);
-
-        if (!isEdit) {
-            deleteButton.setVisibility(View.INVISIBLE);
-            deleteTitle.setVisibility(View.INVISIBLE);
-        }
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                adapter.remove(adapter.getItem(activityPosition));
-                dialog.cancel();
-            }
-        });
-
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isEdit) {
-
-                    adapter.getItem(activityPosition).name = editName.getText().toString();
-                    adapter.getItem(activityPosition).description = editDescription.getText().toString();
-
-                    adapter.notifyDataSetChanged();
-                } else {
-
-                    Activity activity = new Activity();
-
-                    activity.name = editName.getText().toString();
-                    activity.description = editDescription.getText().toString();
-
-                    adapter.add(activity);
-                }
-                dialog.cancel();
-            }
-        });
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.cancel();
-            }
-        });
-
-        dialog.show();
-    }
-
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        //jsonAdapter.activityListSave(activityArrayList);
+    public void onStop() {
+        super.onStop();
+        jsonAdapter.activityListSave(activityArrayList);
     }
 }
