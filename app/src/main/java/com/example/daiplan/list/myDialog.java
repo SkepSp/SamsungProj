@@ -1,5 +1,7 @@
 package com.example.daiplan.list;
 
+import static com.example.daiplan.fragments.HomeFragment.updateFreeTime;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -40,15 +42,18 @@ public class myDialog extends DialogFragment {
             binding.delTitle.setVisibility(View.INVISIBLE);
         }
 
+
+
         binding.delButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity().getApplicationContext(), "You deleted " + adapter.getItem(activityPosition).name, Toast.LENGTH_SHORT).show();
-
-                NotificRegister register = new NotificRegister(getActivity().getApplicationContext(), activityArrayList);
-                //register.synchronizeNotificaton();
-
+                Toast.makeText(getActivity(), "You deleted " + adapter.getItem(activityPosition).name, Toast.LENGTH_SHORT).show();
                 adapter.remove(adapter.getItem(activityPosition));
+
+                NotificRegister register = new NotificRegister(getActivity(), activityArrayList);
+                register.synchronizeNotificaton();
+
+                updateFreeTime();
                 Objects.requireNonNull(getDialog()).cancel();
             }
         });
@@ -57,13 +62,11 @@ public class myDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 timeStartPickerFragment.show(getActivity().getSupportFragmentManager(), "SetTime");
-
             }
         });
 
 
         binding.endButton.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
                 timeEndPickerFragment.show(getActivity().getSupportFragmentManager(), "SetTime");
@@ -80,17 +83,23 @@ public class myDialog extends DialogFragment {
 
                         if (binding.editName.getText().toString().equals("")) {
                             isEverythOk = false;
-                            Toast.makeText(getActivity().getApplicationContext(), "You must set a name", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "You must set a name", Toast.LENGTH_SHORT).show();
                         }
 
                         for (int i = 0; i < 7 && isEverythOk; i++) {
                             for (int j = 0; j < activityArrayList[i].size(); j++) {
                                 if (binding.editName.getText().toString().equals(activityArrayList[i].get(j).name)) {
                                     isEverythOk = false;
-                                    Toast.makeText(getActivity().getApplicationContext(), "You must set a unique name", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "You must set a unique name", Toast.LENGTH_SHORT).show();
                                     break;
                                 }
                             }
+                        }
+
+                        if (timeStartPickerFragment.getHour() * 60 + timeStartPickerFragment.getMinute()
+                                > timeEndPickerFragment.getHour() * 60 + timeEndPickerFragment.getMinute()) {
+                            Toast.makeText(getActivity(), "You must set correct start time", Toast.LENGTH_SHORT).show();
+                            isEverythOk = false;
                         }
 
                         if (timeStartPickerFragment.isUsed() && timeEndPickerFragment.isUsed()) {
@@ -100,7 +109,7 @@ public class myDialog extends DialogFragment {
                                         && timeStartPickerFragment.getHour() * 60 + timeStartPickerFragment.getMinute()
                                         < activityArrayList[dayOfWeek].get(i).hourOfEnd * 60 + activityArrayList[dayOfWeek].get(i).minuteOfEnd) {
 
-                                    Toast.makeText(getActivity().getApplicationContext(), "You must set correct start time", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "You must set correct start time", Toast.LENGTH_SHORT).show();
                                     isEverythOk = false;
                                     break;
                                 }
@@ -110,7 +119,7 @@ public class myDialog extends DialogFragment {
                                         && timeEndPickerFragment.getHour() * 60 + timeEndPickerFragment.getMinute()
                                         < activityArrayList[dayOfWeek].get(i).hourOfEnd * 60 + activityArrayList[dayOfWeek].get(i).minuteOfEnd) {
 
-                                    Toast.makeText(getActivity().getApplicationContext(), "You must set correct end time", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "You must set correct end time", Toast.LENGTH_SHORT).show();
                                     isEverythOk = false;
                                     break;
                                 }
@@ -118,7 +127,7 @@ public class myDialog extends DialogFragment {
 
                         } else {
                             isEverythOk = false;
-                            Toast.makeText(getActivity().getApplicationContext(), "You must set time", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "You must set time", Toast.LENGTH_SHORT).show();
                         }
 
                         if (isEverythOk) {
@@ -133,10 +142,10 @@ public class myDialog extends DialogFragment {
                                 adapter.getItem(activityPosition).hourOfEnd = timeEndPickerFragment.getHour();
                                 adapter.getItem(activityPosition).minuteOfEnd = timeEndPickerFragment.getMinute();
 
-                                adapter.notifyDataSetChanged();
-                                //synchronizeNotification();
+                                adapter.sort();
+                                //adapter.notifyDataSetChanged();
 
-                                Toast.makeText(getActivity().getApplicationContext(), "You changed an activity", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), "You changed an activity", Toast.LENGTH_SHORT).show();
                             } else {
 
                                 Activity activity = new Activity();
@@ -149,15 +158,17 @@ public class myDialog extends DialogFragment {
                                 activity.hourOfEnd = timeEndPickerFragment.getHour();
                                 activity.minuteOfEnd = timeEndPickerFragment.getMinute();
 
-                                adapter.add(activity);
-                                //synchronizeNotification();
 
-                                Toast.makeText(getActivity().getApplicationContext(), "You added an activity", Toast.LENGTH_SHORT).show();
+                                adapter.add(activity);
+                                adapter.sort();
+
+                                Toast.makeText(getActivity(), "You added an activity", Toast.LENGTH_SHORT).show();
                             }
 
-                            NotificRegister register = new NotificRegister(getActivity().getApplicationContext(), activityArrayList);
-                            //register.synchronizeNotificaton();
+                            NotificRegister register = new NotificRegister(getActivity(), activityArrayList);
+                            register.synchronizeNotificaton();
 
+                            updateFreeTime();
                             dialog.cancel();
                         }
                     }

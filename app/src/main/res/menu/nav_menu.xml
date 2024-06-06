@@ -5,7 +5,4 @@
         android:title="Home"
         android:id="@+id/home"/>
 
-    <item
-        android:title="Statistic"
-        android:id="@+id/statistic"/>
 </menu>

@@ -45,7 +45,5 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         return minuteOfDay;
     }
 
-    public boolean isUsed() {
-        return isUsed;
-    }
+    public boolean isUsed() { return isUsed; }
 }

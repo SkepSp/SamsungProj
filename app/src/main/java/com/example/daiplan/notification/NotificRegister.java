@@ -2,8 +2,12 @@ package com.example.daiplan.notification;
 
 import static android.content.Context.ALARM_SERVICE;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -122,40 +126,42 @@ public class NotificRegister {
         int nearestDayOfWeekAct = inpBundle.getInt("day");
         boolean onNextWeek = inpBundle.getBoolean("onNextWeek");
 
-        if (nearestActivity != null) {
+        if (nearestActivity.getName() != null) {
 
             Intent intent = new Intent(packageContext, ReminderBroadcast.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             Bundle bundle = new Bundle();
 
             for (int i = 0; i < 7; i++) {
                 bundle.putSerializable(String.valueOf(i), activityArrayList[i]);
             }
+            bundle.putSerializable("notifyAct", nearestActivity);
 
             intent.putExtra("all", bundle);
-            intent.putExtra("notifyAct", nearestActivity);
 
             //set timer
             Calendar notifyTime = Calendar.getInstance();
             notifyTime.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+            notifyTime.setFirstDayOfWeek(Calendar.MONDAY);
             notifyTime.set(Calendar.DAY_OF_WEEK, nearestDayOfWeekAct);
             notifyTime.set(Calendar.HOUR_OF_DAY, nearestActivity.getHours());
             notifyTime.set(Calendar.MINUTE, nearestActivity.getMinutes());
             notifyTime.set(Calendar.SECOND, 0);
-
-            System.out.println( "Timer is set to  " + notifyTime.getTime().toString());
 
             if (onNextWeek){
                 //add 1 week
                 notifyTime.add(Calendar.MILLISECOND, 604800000);
             }
 
-
+            System.out.println( "Timer is set to " + notifyTime.getTime().toString());
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(packageContext, (int) System.currentTimeMillis(), intent,
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
             AlarmManager alarmManager = (AlarmManager) packageContext.getSystemService(ALARM_SERVICE);
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, notifyTime.getTimeInMillis(), pendingIntent);
+        } else {
+            System.out.println("Alarm didnt set");
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.daiplan.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 
@@ -38,10 +39,10 @@ import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private ListJsonAdapter jsonAdapter;
-    private FragmentHomeBinding binding;
+    private static FragmentHomeBinding binding;
     private boolean isEditable = false;
     private ArrayList<Activity>[] activityArrayList = new ArrayList[7];
-    private ActivityAdapter adapter;
+    private static ActivityAdapter adapter;
     private Context actContext;
 
     public HomeFragment(Context context) {
@@ -62,10 +63,11 @@ public class HomeFragment extends Fragment {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("u");
         binding.tabLayout.selectTab(binding.tabLayout.getTabAt(Integer.parseInt(dateFormat.format(new Date())) - 1));
-        binding.listView.setClickable(false);
 
         adapter = new ActivityAdapter(this.getContext(), activityArrayList[binding.tabLayout.getSelectedTabPosition()]);
         binding.listView.setAdapter(adapter);
+
+        updateFreeTime();
 
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -74,6 +76,8 @@ public class HomeFragment extends Fragment {
 
                 adapter = new ActivityAdapter(context, activityArrayList[tab.getPosition()]);
                 binding.listView.setAdapter(adapter);
+
+                updateFreeTime();
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
@@ -109,9 +113,22 @@ public class HomeFragment extends Fragment {
                 if (isEditable) {
                     myDialog dialog = new myDialog(position, true, binding.tabLayout.getSelectedTabPosition(),adapter, activityArrayList);
                     dialog.show(getActivity().getSupportFragmentManager(), "Tag");
+                } else {
+                    Toast.makeText(actContext, adapter.getActivityList().get(position).description, Toast.LENGTH_LONG).show();
                 }
             }
         });
+    }
+
+
+    public static void updateFreeTime() {
+        int busyTime = 0;
+        for (int i = 0; i < adapter.getActivityList().size(); i++) {
+            busyTime += ( (adapter.getActivityList().get(i).hourOfEnd * 60 + adapter.getActivityList().get(i).minuteOfEnd)
+                        - (adapter.getActivityList().get(i).hourOfStart * 60 + adapter.getActivityList().get(i).minuteOfStart));
+        }
+
+        binding.freeTime.setText("Free Time: " + String.valueOf((int) ((24 * 60) - busyTime) / 60) + "  hr");
     }
 
     @Override

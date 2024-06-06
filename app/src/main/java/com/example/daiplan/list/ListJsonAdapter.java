@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.ContactsContract;
+import android.security.FileIntegrityManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +61,11 @@ public class ListJsonAdapter {
                     activity.name = (String) jsonObject.get("Name");
                     activity.description = (String) jsonObject.get("Description");
 
+                    activity.hourOfStart = jsonObject.getInt("StartTimeHours");
+                    activity.minuteOfStart = jsonObject.getInt("StartTimeMinutes");
+                    activity.hourOfEnd = jsonObject.getInt("EndTimeHours");
+                    activity.minuteOfEnd = jsonObject.getInt("EndTimeMinutes");
+
                     list[i].add(activity);
                 }
             }
@@ -90,6 +96,11 @@ public class ListJsonAdapter {
 
                 jsonObject.put("Name",list[i].get(j).name);
                 jsonObject.put("Description",list[i].get(j).description);
+
+                jsonObject.put("StartTimeHours",list[i].get(j).hourOfStart);
+                jsonObject.put("StartTimeMinutes",list[i].get(j).minuteOfStart);
+                jsonObject.put("EndTimeHours",list[i].get(j).hourOfEnd);
+                jsonObject.put("EndTimeMinutes",list[i].get(j).minuteOfEnd);
 
                 activityArray.put(jsonObject);
             }
