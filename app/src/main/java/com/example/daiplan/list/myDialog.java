@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.daiplan.R;
 import com.example.daiplan.databinding.DialogLayoutBinding;
 import com.example.daiplan.notification.NotificRegister;
 import com.example.daiplan.notification.TimePickerFragment;
@@ -183,6 +184,7 @@ public class myDialog extends DialogFragment {
                 .setTitle("ACTIVITY REDACTOR");
 
         AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(getActivity().getDrawable(R.drawable.dialog_shape));
         this.setCancelable(false);
         return dialog;
     }
