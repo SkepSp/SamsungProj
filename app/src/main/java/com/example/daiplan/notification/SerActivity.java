@@ -3,6 +3,7 @@ package com.example.daiplan.notification;
 import java.io.Serializable;
 
 public class SerActivity implements Serializable {
+    //Activity для передачи в Bundle и дальнейшей работы в receiver`е
    private String name;
    private int hours;
    private int minutes;

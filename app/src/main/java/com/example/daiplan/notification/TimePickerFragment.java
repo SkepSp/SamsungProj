@@ -5,9 +5,8 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-
 import java.util.Calendar;
 
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
@@ -20,6 +19,7 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
     public TimePickerFragment(TextView text) {
         this.text = text;
     }
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -34,7 +34,12 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         this.hourOfDay = hourOfDay;
         minuteOfDay = minute;
 
-        text.setText(hourOfDay + ":" + minute);
+        if (minute < 10) {
+            text.setText(hourOfDay + ":0" + minute);
+        } else {
+            text.setText(hourOfDay + ":" + minute);
+        }
+        //меняем отобажаемый в диалоге редактора текст с указание заданного времени
     }
 
     public int getHour() {

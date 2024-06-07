@@ -1,37 +1,28 @@
 package com.example.daiplan.notification;
 
 import static android.content.Context.ALARM_SERVICE;
-
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-
-import com.example.daiplan.fragments.HomeFragment;
 import com.example.daiplan.list.Activity;
-
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Objects;
 import java.util.TimeZone;
 
 public class NotificRegister {
-    Context packageContext;
-    ArrayList <SerActivity>[] activityArrayList = new ArrayList[7];
+    private Context packageContext;
+    private final ArrayList <SerActivity>[] activityArrayList = new ArrayList[7];
 
     public NotificRegister() {}
+    //конструктор для вызова в receiver'е
     public NotificRegister(Context context, ArrayList<Activity>[] activityArrayList ) {
-        //set list and context
+        //конструктор для вызова вне receiver'а
         packageContext = context;
 
         for (int i = 0; i < 7; i++) {
@@ -45,9 +36,11 @@ public class NotificRegister {
             }
         }
     }
-    public Bundle getNearestInfo(ArrayList <SerActivity>[] activityArrayList) {
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("u");
+    public Bundle getNearestInfo(ArrayList <SerActivity>[] activityArrayList) {
+        //получаем ближайшее Activity, к моменту вызова функции
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("u");
         int currDayOfWeek = Integer.parseInt(dateFormat.format(new Date())) - 1;
 
         int nearestDayOfWeekAct = 0;
@@ -93,6 +86,7 @@ public class NotificRegister {
             }
         }
 
+        //необходимо тк в классе Calendar неделя начинается с SUNDAY
         switch (nearestDayOfWeekAct) {
             case (0):
                 nearestDayOfWeekAct = 2; break;
@@ -110,6 +104,7 @@ public class NotificRegister {
                 nearestDayOfWeekAct = 1; break;
         }
 
+        //необходимая информация для коректной инициализации будильника
         Bundle bundle = new Bundle();
         bundle.putSerializable("activity", nearestActivity);
         bundle.putInt("day", nearestDayOfWeekAct);
@@ -120,12 +115,12 @@ public class NotificRegister {
     @SuppressLint("ScheduleExactAlarm")
     public void synchronizeNotificaton() {
 
-        //initialization
         Bundle inpBundle = getNearestInfo(activityArrayList);
         SerActivity nearestActivity = (SerActivity) inpBundle.getSerializable("activity");
         int nearestDayOfWeekAct = inpBundle.getInt("day");
         boolean onNextWeek = inpBundle.getBoolean("onNextWeek");
 
+        //тк имя активности у нас инициализируется всегда -> если у активности нет имени, то такой активности в списке нет
         if (nearestActivity.getName() != null) {
 
             Intent intent = new Intent(packageContext, ReminderBroadcast.class);
@@ -139,7 +134,7 @@ public class NotificRegister {
 
             intent.putExtra("all", bundle);
 
-            //set timer
+            //устанавливаем время на след будильник
             Calendar notifyTime = Calendar.getInstance();
             notifyTime.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
             notifyTime.setFirstDayOfWeek(Calendar.MONDAY);
@@ -149,11 +144,12 @@ public class NotificRegister {
             notifyTime.set(Calendar.SECOND, 0);
 
             if (onNextWeek){
-                //add 1 week
+                //добавление одной недели (604800000 - 1 неделя в милисикундах)
                 notifyTime.add(Calendar.MILLISECOND, 604800000);
             }
 
-            System.out.println( "Timer is set to " + notifyTime.getTime().toString());
+            //отладка
+            //System.out.println( "Timer is set to " + notifyTime.getTime().toString());
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(packageContext, (int) System.currentTimeMillis(), intent,
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
@@ -161,7 +157,8 @@ public class NotificRegister {
             AlarmManager alarmManager = (AlarmManager) packageContext.getSystemService(ALARM_SERVICE);
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, notifyTime.getTimeInMillis(), pendingIntent);
         } else {
-            System.out.println("Alarm didnt set");
+            //отладка
+            //System.out.println("Alarm didnt set");
         }
     }
 }

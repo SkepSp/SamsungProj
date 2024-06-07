@@ -2,9 +2,7 @@ package com.example.daiplan.notification;
 
 
 import static android.content.Context.ALARM_SERVICE;
-
 import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -15,9 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
 import com.example.daiplan.R;
-
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,14 +38,17 @@ public class ReminderBroadcast extends BroadcastReceiver {
         }
         SerActivity notifyActivity = (SerActivity) ext.getSerializable("notifyAct");
 
-
+        //создание канала уведомлений
         NotificationChannel notificationChannel = new NotificationChannel("notifyReminder", "name", NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = getSystemService(context, NotificationManager.class);
+        assert notificationManager != null;
         notificationManager.createNotificationChannel(notificationChannel);
 
 
+        assert notifyActivity != null;
         showNotification(notifyActivity, context);
 
+        //получаем информацию необходимую для инициализации будильника
         Bundle inpBundle = new NotificRegister().getNearestInfo(list);
 
         SerActivity nearestActivity = (SerActivity) inpBundle.getSerializable("activity");
@@ -65,16 +64,15 @@ public class ReminderBroadcast extends BroadcastReceiver {
         notifyTime.set(Calendar.SECOND, 0);
 
         if (onNextWeek){
-            //add 1 week
+            //добавляем 1 неделю
             notifyTime.add(Calendar.MILLISECOND, 604800000);
         }
-
-
 
         Intent newIntent = new Intent(context, ReminderBroadcast.class);
         newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        System.out.println( "(receiver) Timer is set to  " + notifyTime.getTime().toString());
+        //отладка
+        //System.out.println( "(receiver) Timer is set to  " + notifyTime.getTime().toString());
 
         Bundle newBundle = new Bundle();
         for (int i = 0; i < 7; i++) {
@@ -93,6 +91,7 @@ public class ReminderBroadcast extends BroadcastReceiver {
     }
 
     private void showNotification(SerActivity notifyActivity, Context context) {
+        //создание и отображение уведомления пользователя
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         assert notifyActivity != null;

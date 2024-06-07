@@ -6,23 +6,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
 import com.example.daiplan.R;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 
 public class ActivityAdapter extends ArrayAdapter <Activity> {
-    private ArrayList <Activity> activityList;
+    private final ArrayList <Activity> activityList;
 
     public ActivityAdapter(Context context, ArrayList<Activity> activityList) {
         super(context, R.layout.adapter_item, activityList);
         this.activityList = activityList;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         final Activity activity = getItem(position);
 
@@ -30,10 +28,27 @@ public class ActivityAdapter extends ArrayAdapter <Activity> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_item, null);
         }
 
+        assert activity != null;
         ((TextView) convertView.findViewById(R.id.activityName)).setText(activity.name);
-        ((TextView) convertView.findViewById(R.id.activityDescription)).setText(activity.description);
-        ((TextView) convertView.findViewById(R.id.startTimeView)).setText(activity.hourOfStart + ":" + activity.minuteOfStart);
-        ((TextView) convertView.findViewById(R.id.endTimeView)).setText(activity.hourOfEnd + ":" + activity.minuteOfEnd);
+
+        TextView textView = convertView.findViewById(R.id.activityDescription);
+        if (Objects.equals(activity.description, "")) {
+            textView.setVisibility(View.INVISIBLE);
+        } else {
+            textView.setText(activity.description);
+        }
+
+        if (activity.minuteOfStart < 10) {
+            ((TextView) convertView.findViewById(R.id.startTimeView)).setText(activity.hourOfStart + ":0" + activity.minuteOfStart);
+        }else {
+            ((TextView) convertView.findViewById(R.id.startTimeView)).setText(activity.hourOfStart + ":" + activity.minuteOfStart);
+        }
+
+        if (activity.minuteOfEnd < 10) {
+            ((TextView) convertView.findViewById(R.id.endTimeView)).setText(activity.hourOfEnd + ":0" + activity.minuteOfEnd);
+        } else {
+            ((TextView) convertView.findViewById(R.id.endTimeView)).setText(activity.hourOfEnd + ":" + activity.minuteOfEnd);
+        }
 
         return convertView;
     }

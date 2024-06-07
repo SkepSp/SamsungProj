@@ -33,11 +33,9 @@
         android:id="@+id/startTimeView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="1dp"
-        android:textSize="20sp"
         android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/activityName"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@id/devider"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -47,7 +45,6 @@
         android:textSize="20sp"
         android:text="—"
         android:layout_marginTop="8dp"
-        android:layout_marginStart="2dp"
         app:layout_constraintStart_toEndOf="@+id/startTimeView"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,8 +54,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
-        android:textSize="20sp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/devider"
         app:layout_constraintTop_toTopOf="parent" />
 

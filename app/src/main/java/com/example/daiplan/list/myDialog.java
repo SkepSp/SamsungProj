@@ -1,34 +1,29 @@
 package com.example.daiplan.list;
 
 import static com.example.daiplan.fragments.HomeFragment.updateFreeTime;
-
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-
 import com.example.daiplan.R;
 import com.example.daiplan.databinding.DialogLayoutBinding;
 import com.example.daiplan.notification.NotificRegister;
 import com.example.daiplan.notification.TimePickerFragment;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class myDialog extends DialogFragment {
 
-    private Integer activityPosition;
-    private boolean isEdit;
-    private int dayOfWeek;
-    private ActivityAdapter adapter;
-    private ArrayList<Activity>[] activityArrayList;
+    private final Integer activityPosition;
+    private final boolean isEdit;
+    private final int dayOfWeek;
+    private final ActivityAdapter adapter;
+    private final ArrayList<Activity>[] activityArrayList;
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -38,16 +33,17 @@ public class myDialog extends DialogFragment {
         TimePickerFragment timeStartPickerFragment = new TimePickerFragment(binding.startTime);
         TimePickerFragment timeEndPickerFragment = new TimePickerFragment(binding.endTime);
 
+        //проверка, вошли ли мы в edit mode
         if (!isEdit) {
             binding.delButton.setVisibility(View.INVISIBLE);
             binding.delTitle.setVisibility(View.INVISIBLE);
         }
 
 
-
         binding.delButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //удаление активности
                 Toast.makeText(getActivity(), "You deleted " + adapter.getItem(activityPosition).name, Toast.LENGTH_SHORT).show();
                 adapter.remove(adapter.getItem(activityPosition));
 
@@ -62,6 +58,7 @@ public class myDialog extends DialogFragment {
         binding.startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //инициализация времени начала активности
                 timeStartPickerFragment.show(getActivity().getSupportFragmentManager(), "SetTime");
             }
         });
@@ -70,6 +67,7 @@ public class myDialog extends DialogFragment {
         binding.endButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //инициализация времени конца активности
                 timeEndPickerFragment.show(getActivity().getSupportFragmentManager(), "SetTime");
             }
         });
@@ -82,11 +80,15 @@ public class myDialog extends DialogFragment {
 
                         boolean isEverythOk = true;
 
+                        //прокерки на коректность введенной информации
+
+                        //проверка - не пустое ли имя
                         if (binding.editName.getText().toString().equals("")) {
                             isEverythOk = false;
                             Toast.makeText(getActivity(), "You must set a name", Toast.LENGTH_SHORT).show();
                         }
 
+                        //проверка на уникальность имени
                         for (int i = 0; i < 7 && isEverythOk; i++) {
                             for (int j = 0; j < activityArrayList[i].size(); j++) {
                                 if (binding.editName.getText().toString().equals(activityArrayList[i].get(j).name)) {
@@ -96,6 +98,8 @@ public class myDialog extends DialogFragment {
                                 }
                             }
                         }
+
+                        //проверки на коректность времени
 
                         if (timeStartPickerFragment.getHour() * 60 + timeStartPickerFragment.getMinute()
                                 > timeEndPickerFragment.getHour() * 60 + timeEndPickerFragment.getMinute()) {
@@ -134,7 +138,7 @@ public class myDialog extends DialogFragment {
                         if (isEverythOk) {
 
                             if (isEdit) {
-
+                                //редактирование существующей активности
                                 adapter.getItem(activityPosition).name = binding.editName.getText().toString();
                                 Objects.requireNonNull(adapter.getItem(activityPosition)).description = binding.editDescription.getText().toString();
 
@@ -144,11 +148,10 @@ public class myDialog extends DialogFragment {
                                 adapter.getItem(activityPosition).minuteOfEnd = timeEndPickerFragment.getMinute();
 
                                 adapter.sort();
-                                //adapter.notifyDataSetChanged();
 
                                 Toast.makeText(getActivity(), "You changed an activity", Toast.LENGTH_SHORT).show();
                             } else {
-
+                                //добавление новой активности
                                 Activity activity = new Activity();
 
                                 activity.name = binding.editName.getText().toString();
@@ -159,13 +162,13 @@ public class myDialog extends DialogFragment {
                                 activity.hourOfEnd = timeEndPickerFragment.getHour();
                                 activity.minuteOfEnd = timeEndPickerFragment.getMinute();
 
-
                                 adapter.add(activity);
                                 adapter.sort();
 
                                 Toast.makeText(getActivity(), "You added an activity", Toast.LENGTH_SHORT).show();
                             }
 
+                            //синхронизация будильника с новым списком активностей
                             NotificRegister register = new NotificRegister(getActivity(), activityArrayList);
                             register.synchronizeNotificaton();
 
@@ -190,7 +193,7 @@ public class myDialog extends DialogFragment {
     }
 
     public myDialog(Integer activityPosition, boolean isEdit, int dayOfWeek, @NonNull ActivityAdapter adapter,
-                    @NonNull ArrayList<Activity>[] activityArrayList) { //если крашит то мб из-за NonNull
+                    @NonNull ArrayList<Activity>[] activityArrayList) {
         this.activityPosition = activityPosition;
         this.isEdit = isEdit;
         this.dayOfWeek = dayOfWeek;

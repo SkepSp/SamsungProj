@@ -1,49 +1,36 @@
 package com.example.daiplan.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
-
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.daiplan.R;
 import com.example.daiplan.databinding.FragmentHomeBinding;
 import com.example.daiplan.list.Activity;
 import com.example.daiplan.list.ActivityAdapter;
 import com.example.daiplan.list.ListJsonAdapter;
 import com.example.daiplan.list.myDialog;
-import com.example.daiplan.notification.TimePickerFragment;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
-
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
+
 
 
 public class HomeFragment extends Fragment {
-    private ListJsonAdapter jsonAdapter;
+    private final ListJsonAdapter jsonAdapter;
+    @SuppressLint("StaticFieldLeak")
     private static FragmentHomeBinding binding;
     private boolean isEditable = false;
-    private ArrayList<Activity>[] activityArrayList = new ArrayList[7];
+    private final ArrayList<Activity>[] activityArrayList = new ArrayList[7];
     private static ActivityAdapter adapter;
-    private Context actContext;
+    private final Context actContext;
 
     public HomeFragment(Context context) {
         super();
@@ -61,7 +48,7 @@ public class HomeFragment extends Fragment {
 
         jsonAdapter.activityListSetup(activityArrayList);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("u");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("u");
         binding.tabLayout.selectTab(binding.tabLayout.getTabAt(Integer.parseInt(dateFormat.format(new Date())) - 1));
 
         adapter = new ActivityAdapter(this.getContext(), activityArrayList[binding.tabLayout.getSelectedTabPosition()]);
@@ -122,6 +109,7 @@ public class HomeFragment extends Fragment {
 
 
     public static void updateFreeTime() {
+        //обнавляем FreeTime
         int busyTime = 0;
         for (int i = 0; i < adapter.getActivityList().size(); i++) {
             busyTime += ( (adapter.getActivityList().get(i).hourOfEnd * 60 + adapter.getActivityList().get(i).minuteOfEnd)
@@ -132,7 +120,7 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();

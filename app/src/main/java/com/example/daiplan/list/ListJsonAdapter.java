@@ -2,21 +2,11 @@ package com.example.daiplan.list;
 
 
 import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.ContactsContract;
-import android.security.FileIntegrityManager;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,13 +15,14 @@ import java.util.ArrayList;
 
 public class ListJsonAdapter {
 
-    private Context context;
-    private String fileName;
+    private final Context context;
+    private final String fileName;
     public ListJsonAdapter(Context context) {
         this.context = context;
         fileName = "DaiPlanData.json";
     }
     public void activityListSetup(ArrayList<Activity>[] list) {
+        //инициализация листа активностей из json файла на устройстве
         try {
             String recivingString = "";
 
@@ -71,15 +62,12 @@ public class ListJsonAdapter {
             }
 
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }catch(IOException e) {
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
     }
     public void activityListSave(ArrayList<Activity>[] list) {
+        //сохранение листа активностей в json файл на устройстве
         try {
         JSONObject mainRoot = new JSONObject();
         JSONArray daysArray = new JSONArray();
@@ -112,11 +100,7 @@ public class ListJsonAdapter {
         outputStreamWriter.write(mainRoot.toString());
         outputStreamWriter.close();
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
 
